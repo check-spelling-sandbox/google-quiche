@@ -3056,7 +3056,7 @@ TEST_P(SpdyFramerTest, TooLargePushPromiseFrameUsesContinuation) {
 }
 
 // Check that the framer stops delivering header data chunks once the visitor
-// declares it doesn't want any more. This is important to guard against
+// declares it doesn't want anymore. This is important to guard against
 // "zip bomb" types of attacks.
 TEST_P(SpdyFramerTest, ControlFrameMuchTooLarge) {
   const size_t kHeaderBufferChunks = 4;
