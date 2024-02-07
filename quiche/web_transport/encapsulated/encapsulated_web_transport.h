@@ -120,7 +120,7 @@ class QUICHE_EXPORT EncapsulatedSession
   // here. This class does automatically run garbage collection at the end of
   // every OnCanRead() call (since it's a top-level entrypoint that is likely to
   // come directly from I/O handler), but if the application does not happen to
-  // read data frequently, manual calls to this function may be requried.
+  // read data frequently, manual calls to this function may be required.
   void GarbageCollectStreams();
 
  private:
