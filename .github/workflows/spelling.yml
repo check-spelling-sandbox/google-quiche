@@ -122,6 +122,7 @@ jobs:
           cspell:filetypes/filetypes.txt
           cspell:mnemonics/src/mnemonics.txt
           cspell:cpp/src/stdlib-cmath.txt
+          cspell:django/dict/django.txt
 
   update:
     name: Update PR
