@@ -203,7 +203,7 @@ class QUICHE_NO_EXPORT ObjectPreferDatagramMessage : public ObjectMessage {
   };
 };
 
-// Concatentation of the base header and the object-specific header. Follow-on
+// Concatenation of the base header and the object-specific header. Follow-on
 // object headers are handled in a different class.
 class QUICHE_NO_EXPORT StreamHeaderTrackMessage : public ObjectMessage {
  public:
