@@ -33,7 +33,7 @@ QUIC_FLAG(quic_restart_flag_quic_testonly_default_true, true)
 QUIC_FLAG(quic_restart_flag_spdy_testonly_default_true, false)
 // If enabled and a BSUS connection is received, blocks server connections until SETTINGS frame is received.
 QUIC_FLAG(quic_reloadable_flag_quic_block_until_settings_received_copt, true)
-// If trrue, early return before write control frame in OnCanWrite() if the connection is already closed.
+// If true, early return before write control frame in OnCanWrite() if the connection is already closed.
 QUIC_FLAG(quic_reloadable_flag_quic_no_write_control_frame_upon_connection_close, true)
 // If true, QUIC server will not respond to gQUIC probing packet(PING + PADDING) but treat it as a regular packet.
 QUIC_FLAG(quic_reloadable_flag_quic_ignore_gquic_probing, true)
