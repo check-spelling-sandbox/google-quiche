@@ -127,7 +127,7 @@ class QuicMemoryCacheBackend : public QuicSimpleServerBackend {
   void EnableWebTransport();
 
   // Implements the functions for interface QuicSimpleServerBackend
-  // |cache_cirectory| can be generated using `wget -p --save-headers <url>`.
+  // |cache_directory| can be generated using `wget -p --save-headers <url>`.
   bool InitializeBackend(const std::string& cache_directory) override;
   bool IsBackendInitialized() const override;
   void FetchResponseFromBackend(
