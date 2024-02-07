@@ -367,7 +367,7 @@ class QUICHE_EXPORT QuicFramer {
   // Size in bytes of all reset stream frame fields.
   static size_t GetRstStreamFrameSize(QuicTransportVersion version,
                                       const QuicRstStreamFrame& frame);
-  // Size in bytes of all ack frenquency frame fields.
+  // Size in bytes of all ack frequency frame fields.
   static size_t GetAckFrequencyFrameSize(const QuicAckFrequencyFrame& frame);
   // Size in bytes of all RESET_STREAM_AT frame fields.
   static size_t GetResetStreamAtFrameSize(const QuicResetStreamAtFrame& frame);
