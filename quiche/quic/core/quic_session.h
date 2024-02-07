@@ -837,7 +837,7 @@ class QUICHE_EXPORT QuicSession
   // indicated by |unidirectional|.
   QuicStreamId GetLargestPeerCreatedStreamId(bool unidirectional) const;
 
-  // Deletes the connection and sets it to nullptr, so calling it mulitiple
+  // Deletes the connection and sets it to nullptr, so calling it multiple
   // times is safe.
   void DeleteConnection();
 
