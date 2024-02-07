@@ -2560,7 +2560,7 @@ class TestValidationResultDelegate : public QuicPathValidator::ResultDelegate {
 };
 
 // A test implementation which migrates to server preferred address
-// on path validation suceeds. Otherwise, client cleans up alternative path.
+// on path validation succeeds. Otherwise, client cleans up alternative path.
 class ServerPreferredAddressTestResultDelegate
     : public QuicPathValidator::ResultDelegate {
  public:
