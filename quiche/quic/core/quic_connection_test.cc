@@ -5083,7 +5083,7 @@ TEST_P(QuicConnectionTest, PingAfterSend) {
   EXPECT_EQ(QuicTime::Delta::FromSeconds(15),
             connection_.GetPingAlarm()->deadline() - clock_.ApproximateNow());
 
-  // Now recevie an ACK of the previous packet, which will move the
+  // Now receive an ACK of the previous packet, which will move the
   // ping alarm forward.
   clock_.AdvanceTime(QuicTime::Delta::FromMilliseconds(5));
   QuicAckFrame frame = InitAckFrame(1);
@@ -5136,7 +5136,7 @@ TEST_P(QuicConnectionTest, ReducedPingTimeout) {
   EXPECT_EQ(QuicTime::Delta::FromSeconds(10),
             connection_.GetPingAlarm()->deadline() - clock_.ApproximateNow());
 
-  // Now recevie an ACK of the previous packet, which will move the
+  // Now receive an ACK of the previous packet, which will move the
   // ping alarm forward.
   clock_.AdvanceTime(QuicTime::Delta::FromMilliseconds(5));
   QuicAckFrame frame = InitAckFrame(1);
@@ -11266,7 +11266,7 @@ TEST_P(QuicConnectionTest, DoNotSendPing) {
   EXPECT_EQ(QuicTime::Delta::FromSeconds(15),
             connection_.GetPingAlarm()->deadline() - clock_.ApproximateNow());
 
-  // Now recevie an ACK and response of the previous packet, which will move the
+  // Now receive an ACK and response of the previous packet, which will move the
   // ping alarm forward.
   clock_.AdvanceTime(QuicTime::Delta::FromMilliseconds(5));
   QuicFrames frames;
