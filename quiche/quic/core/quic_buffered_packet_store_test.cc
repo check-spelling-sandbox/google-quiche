@@ -433,7 +433,7 @@ TEST_F(QuicBufferedPacketStoreTest, SimpleDiscardPackets) {
   EXPECT_TRUE(store_.HasBufferedPackets(connection_id));
   EXPECT_FALSE(store_.HasChlosBuffered());
 
-  // Dicard the packets
+  // Discard the packets
   store_.DiscardPackets(connection_id);
 
   // No packets on connection 1 should remain in the store
@@ -462,7 +462,7 @@ TEST_F(QuicBufferedPacketStoreTest, DiscardWithCHLOs) {
   EXPECT_TRUE(store_.HasBufferedPackets(connection_id));
   EXPECT_TRUE(store_.HasChlosBuffered());
 
-  // Dicard the packets
+  // Discard the packets
   store_.DiscardPackets(connection_id);
 
   // No packets on connection 1 should remain in the store
