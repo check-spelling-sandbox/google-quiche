@@ -7519,7 +7519,7 @@ TEST_P(EndToEndTest, RequestsBurstMitigation) {
     return;
   }
 
-  // Send 50 requests simutanuously and wait for their responses. Hopefully at
+  // Send 50 requests simultaneously and wait for their responses. Hopefully at
   // least more than 5 of these requests will arrive at the server in the same
   // event loop and cause some of them to be pending till the next loop.
   for (int i = 0; i < 50; ++i) {
