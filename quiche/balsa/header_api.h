@@ -80,7 +80,7 @@ class QUICHE_EXPORT ConstHeaderApi {
   virtual bool HeaderHasValue(absl::string_view key,
                               absl::string_view value) const = 0;
 
-  // Same as above, but value is treated as case insensitive.
+  // Same as above, but value is treated as case-insensitive.
   virtual bool HeaderHasValueIgnoreCase(absl::string_view key,
                                         absl::string_view value) const = 0;
 
@@ -93,7 +93,7 @@ class QUICHE_EXPORT ConstHeaderApi {
   }
 
   // Returns true if we have at least one header with given prefix
-  // [case insensitive]. Currently for test use only.
+  // [case-insensitive]. Currently for test use only.
   virtual bool HasHeadersWithPrefix(absl::string_view key) const = 0;
 
   // Returns the key value pairs for all headers where the header key begins
@@ -206,7 +206,7 @@ class QUICHE_EXPORT HeaderApi : public virtual ConstHeaderApi {
   // |value|.
   virtual void AppendHeader(absl::string_view key, absl::string_view value) = 0;
 
-  // Removes all headers starting with 'key' [case insensitive]
+  // Removes all headers starting with 'key' [case-insensitive]
   virtual void RemoveAllHeadersWithPrefix(absl::string_view key) = 0;
 
   // Appends ',value' to an existing header named 'key'.  If no header with the

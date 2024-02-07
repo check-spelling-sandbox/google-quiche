@@ -625,7 +625,7 @@ class QUICHE_EXPORT BalsaHeaders : public HeaderApi {
   const_header_lines_iterator GetHeaderPosition(absl::string_view key) const;
 
   // Removes all headers in given set |keys| at once efficiently. Keys
-  // are case insensitive.
+  // are case-insensitive.
   //
   // Alternatives considered:
   //
@@ -643,11 +643,11 @@ class QUICHE_EXPORT BalsaHeaders : public HeaderApi {
 
   void RemoveAllOfHeader(absl::string_view key) override;
 
-  // Removes all headers starting with 'key' [case insensitive]
+  // Removes all headers starting with 'key' [case-insensitive]
   void RemoveAllHeadersWithPrefix(absl::string_view prefix) override;
 
   // Returns true if we have at least one header with given prefix
-  // [case insensitive]. Currently for test use only.
+  // [case-insensitive]. Currently for test use only.
   bool HasHeadersWithPrefix(absl::string_view prefix) const override;
 
   // Returns the key value pairs for all headers where the header key begins

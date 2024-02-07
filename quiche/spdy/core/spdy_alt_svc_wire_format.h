@@ -89,7 +89,7 @@ class QUICHE_EXPORT SpdyAltSvcWireFormat {
   static bool ParsePositiveInteger32(absl::string_view::const_iterator c,
                                      absl::string_view::const_iterator end,
                                      uint32_t* value);
-  // Parse |c| as hexadecimal digit, case insensitive.  |c| must be [0-9a-fA-F].
+  // Parse |c| as hexadecimal digit, case-insensitive.  |c| must be [0-9a-fA-F].
   // Output is between 0 and 15.
   static char HexDigitToInt(char c);
   // Parse |data| as hexadecimal number into |*value|.  |data| must only contain

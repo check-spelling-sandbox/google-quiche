@@ -229,7 +229,7 @@ TEST(HttpHeaderBlockTest, UpperCaseNames) {
   EXPECT_NE(block.end(), block.find("foo"));
   EXPECT_EQ(Pair("Foo", std::string("foo\0bar", 7)), *block.find("Foo"));
 
-  // The map is case insensitive, so updating "foo" modifies the entry
+  // The map is case-insensitive, so updating "foo" modifies the entry
   // previously added.
   block.AppendValueOrAddHeader("foo", "baz");
   EXPECT_THAT(block,
