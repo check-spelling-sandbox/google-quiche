@@ -156,12 +156,12 @@ bool QuicPacketCreator::CanSetMaxPacketLength() const {
 }
 
 void QuicPacketCreator::SetMaxPacketLength(QuicByteCount length) {
-  if (!GetQuicRestartFlag(quic_allow_control_frames_while_procesing)) {
+  if (!GetQuicRestartFlag(quic_allow_control_frames_while_processing)) {
     QUICHE_DCHECK(CanSetMaxPacketLength()) << ENDPOINT;
   } else {
-    QUIC_RESTART_FLAG_COUNT_N(quic_allow_control_frames_while_procesing, 2, 3);
+    QUIC_RESTART_FLAG_COUNT_N(quic_allow_control_frames_while_processing, 2, 3);
     if (!CanSetMaxPacketLength()) {
-      QUIC_RESTART_FLAG_COUNT_N(quic_allow_control_frames_while_procesing, 3,
+      QUIC_RESTART_FLAG_COUNT_N(quic_allow_control_frames_while_processing, 3,
                                 3);
       // The new max packet length will be applied to the next packet.
       next_max_packet_length_ = length;

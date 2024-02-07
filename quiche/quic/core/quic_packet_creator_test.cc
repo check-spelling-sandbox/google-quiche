@@ -389,7 +389,7 @@ TEST_P(QuicPacketCreatorTest, SerializeLargerPacketWithPadding) {
 }
 
 TEST_P(QuicPacketCreatorTest, IncreaseMaxPacketLengthWithFramesPending) {
-  if (!GetQuicRestartFlag(quic_allow_control_frames_while_procesing)) {
+  if (!GetQuicRestartFlag(quic_allow_control_frames_while_processing)) {
     // When this flag is not set, the call to SetMaxPacketLength()
     // is an error which triggers a QUICHE_DCHECK.
     return;
