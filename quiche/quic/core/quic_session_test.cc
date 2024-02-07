@@ -958,7 +958,7 @@ TEST_P(QuicSessionTestServer, ManyAvailableUnidirectionalStreams) {
     // Now try to get the last possible bidirectional stream.
     EXPECT_NE(nullptr, session_.GetOrCreateStream(
                            GetNthClientInitiatedBidirectionalId(49)));
-    // and this should fail because it exceeds the bnidirectional limit
+    // and this should fail because it exceeds the bidirectional limit
     // (but not the uni-)
     std::string error_detail;
     if (QuicVersionUsesCryptoFrames(transport_version())) {
