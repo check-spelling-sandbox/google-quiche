@@ -68,7 +68,7 @@ class QUICHE_EXPORT MoqtParser {
 
  private:
   // The central switch statement to dispatch a message to the correct
-  // Process* function. Returns 0 if it could not parse the full messsage
+  // Process* function. Returns 0 if it could not parse the full message
   // (except for object payload). Otherwise, returns the number of bytes
   // processed.
   size_t ProcessMessage(absl::string_view data, bool fin);
