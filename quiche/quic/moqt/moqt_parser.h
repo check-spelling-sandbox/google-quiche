@@ -146,7 +146,7 @@ class QUICHE_EXPORT MoqtParser {
   size_t payload_length_remaining_ = 0;
 
   bool processing_ = false;  // True if currently in ProcessData(), to prevent
-                             // re-entrancy.
+                             // reentrancy.
 };
 
 }  // namespace moqt
