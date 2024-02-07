@@ -835,7 +835,7 @@ TEST_F(MoqtMessageSpecificTest, AllMessagesTogether) {
     // Each iteration, process from the halfway point of one message to the
     // halfway point of the next.
     if (IsObjectMessage(type)) {
-      continue;  // Objects cannot share a stream with other meessages.
+      continue;  // Objects cannot share a stream with other messages.
     }
     std::unique_ptr<TestMessageBase> message =
         CreateTestMessage(type, kRawQuic);
