@@ -65,7 +65,7 @@ bool QuicClientDefaultNetworkHelper::CreateUDPSocketAndBind(
   // Some platforms expect that the addrlen given to bind() exactly matches the
   // size of the associated protocol family's sockaddr struct.
   // TODO(b/179430548): Revert this when affected platforms are updated to
-  // to support binding with an addrelen of sizeof(sockaddr_storage)
+  // to support binding with an addrlen of sizeof(sockaddr_storage)
   socklen_t addrlen;
   switch (client_address.host().address_family()) {
     case IpAddressFamily::IP_V4:
