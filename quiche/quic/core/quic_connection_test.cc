@@ -114,7 +114,7 @@ QuicStreamId GetNthClientInitiatedStreamId(int n,
          n * 2;
 }
 
-QuicLongHeaderType EncryptionlevelToLongHeaderType(EncryptionLevel level) {
+QuicLongHeaderType EncryptionLevelToLongHeaderType(EncryptionLevel level) {
   switch (level) {
     case ENCRYPTION_INITIAL:
       return INITIAL;
@@ -1134,7 +1134,7 @@ class QuicConnectionTest : public QuicTestWithParam<TestParams> {
       // Set long header type accordingly.
       header.version_flag = true;
       header.form = IETF_QUIC_LONG_HEADER_PACKET;
-      header.long_packet_type = EncryptionlevelToLongHeaderType(level);
+      header.long_packet_type = EncryptionLevelToLongHeaderType(level);
       if (QuicVersionHasLongHeaderLengths(
               peer_framer_.version().transport_version)) {
         header.length_length = quiche::VARIABLE_LENGTH_INTEGER_LENGTH_2;

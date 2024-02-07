@@ -41,7 +41,7 @@
 namespace quic {
 namespace {
 
-QuicLongHeaderType EncryptionlevelToLongHeaderType(EncryptionLevel level) {
+QuicLongHeaderType EncryptionLevelToLongHeaderType(EncryptionLevel level) {
   switch (level) {
     case ENCRYPTION_INITIAL:
       return INITIAL;
@@ -1270,7 +1270,7 @@ quiche::QuicheVariableLengthIntegerLength
 QuicPacketCreator::GetRetryTokenLengthLength() const {
   if (QuicVersionHasLongHeaderLengths(framer_->transport_version()) &&
       HasIetfLongHeader() &&
-      EncryptionlevelToLongHeaderType(packet_.encryption_level) == INITIAL) {
+      EncryptionLevelToLongHeaderType(packet_.encryption_level) == INITIAL) {
     return QuicDataWriter::GetVarInt62Len(GetRetryToken().length());
   }
   return quiche::VARIABLE_LENGTH_INTEGER_LENGTH_0;
@@ -1279,7 +1279,7 @@ QuicPacketCreator::GetRetryTokenLengthLength() const {
 absl::string_view QuicPacketCreator::GetRetryToken() const {
   if (QuicVersionHasLongHeaderLengths(framer_->transport_version()) &&
       HasIetfLongHeader() &&
-      EncryptionlevelToLongHeaderType(packet_.encryption_level) == INITIAL) {
+      EncryptionLevelToLongHeaderType(packet_.encryption_level) == INITIAL) {
     return retry_token_;
   }
   return absl::string_view();
@@ -1686,7 +1686,7 @@ quiche::QuicheVariableLengthIntegerLength QuicPacketCreator::GetLengthLength()
   if (QuicVersionHasLongHeaderLengths(framer_->transport_version()) &&
       HasIetfLongHeader()) {
     QuicLongHeaderType long_header_type =
-        EncryptionlevelToLongHeaderType(packet_.encryption_level);
+        EncryptionLevelToLongHeaderType(packet_.encryption_level);
     if (long_header_type == INITIAL || long_header_type == ZERO_RTT_PROTECTED ||
         long_header_type == HANDSHAKE) {
       return quiche::VARIABLE_LENGTH_INTEGER_LENGTH_2;
@@ -1721,7 +1721,7 @@ void QuicPacketCreator::FillPacketHeader(QuicPacketHeader* header) {
     return;
   }
   header->long_packet_type =
-      EncryptionlevelToLongHeaderType(packet_.encryption_level);
+      EncryptionLevelToLongHeaderType(packet_.encryption_level);
 }
 
 size_t QuicPacketCreator::GetSerializedFrameLength(const QuicFrame& frame) {
