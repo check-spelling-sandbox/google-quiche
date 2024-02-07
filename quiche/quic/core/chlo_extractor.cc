@@ -78,7 +78,7 @@ class ChloFramerVisitor : public QuicFramerVisitorInterface,
   bool OnPaddingFrame(const QuicPaddingFrame& frame) override;
   bool OnMessageFrame(const QuicMessageFrame& frame) override;
   bool OnHandshakeDoneFrame(const QuicHandshakeDoneFrame& frame) override;
-  bool OnAckFrequencyFrame(const QuicAckFrequencyFrame& farme) override;
+  bool OnAckFrequencyFrame(const QuicAckFrequencyFrame& frame) override;
   bool OnResetStreamAtFrame(const QuicResetStreamAtFrame& frame) override;
   void OnPacketComplete() override {}
   bool IsValidStatelessResetToken(
