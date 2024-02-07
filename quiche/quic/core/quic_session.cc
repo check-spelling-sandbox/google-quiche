@@ -1926,7 +1926,7 @@ void QuicSession::ActivateStream(std::unique_ptr<QuicStream> stream) {
   if (version().HasIetfQuicFrames() && IsIncomingStream(stream_id) &&
       max_streams_accepted_per_loop_ != kMaxQuicStreamCount) {
     QUICHE_DCHECK(!ExceedsPerLoopStreamLimit());
-    // Per-loop stream limit is emposed.
+    // Per-loop stream limit is imposed.
     ++new_incoming_streams_in_current_loop_;
     if (!stream_count_reset_alarm_->IsSet()) {
       stream_count_reset_alarm_->Set(connection()->clock()->ApproximateNow());
