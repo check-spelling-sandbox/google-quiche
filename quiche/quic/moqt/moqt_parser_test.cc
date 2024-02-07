@@ -285,7 +285,7 @@ TEST_P(MoqtParserTest, OneMessageWithLongVarints) {
 
 TEST_P(MoqtParserTest, TwoPartMessage) {
   std::unique_ptr<TestMessageBase> message = MakeMessage(message_type_);
-  // The test Object message has payload for less then half the message length,
+  // The test Object message has payload for less than half the message length,
   // so splitting the message in half will prevent the first half from being
   // processed.
   size_t first_data_size = message->total_message_size() / 2;
