@@ -67,7 +67,7 @@ class QUICHE_EXPORT QuicPacketCreator {
     // When sending flow controlled data, this will be called after
     // MaybeBundleOpportunistically(). If the returned flow control send window
     // is smaller than data's write_length, write_length will be adjusted
-    // acccordingly.
+    // accordingly.
     // If the delegate has no notion of flow control, it should return
     // std::numeric_limit<QuicByteCount>::max().
     virtual QuicByteCount GetFlowControlSendWindowSize(QuicStreamId id) = 0;
