@@ -356,7 +356,7 @@ class QUICHE_EXPORT QuicStream : public QuicStreamSequencer::StreamInterface {
   // nothing happens. If `buffer_unconditionally` is set to true, behaves
   // similar to `WriteOrBufferData()` in terms of buffering.
   QuicConsumedData WriteMemSlices(absl::Span<quiche::QuicheMemSlice> span,
-                                  bool fin, bool buffer_uncondtionally = false);
+                                  bool fin, bool buffer_unconditionally = false);
   QuicConsumedData WriteMemSlice(quiche::QuicheMemSlice span, bool fin);
 
   // Returns true if any stream data is lost (including fin) and needs to be

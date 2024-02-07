@@ -86,7 +86,7 @@ absl::Status WebTransportStreamAdapter::Writev(
       GetQuicFlag(quic_send_buffer_max_data_slice_size));
   QuicConsumedData consumed = stream_->WriteMemSlices(
       storage.ToSpan(), /*fin=*/options.send_fin(),
-      /*buffer_uncondtionally=*/options.buffer_unconditionally());
+      /*buffer_unconditionally=*/options.buffer_unconditionally());
 
   if (consumed.bytes_consumed == total_size) {
     return absl::OkStatus();
