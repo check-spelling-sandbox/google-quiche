@@ -529,7 +529,7 @@ class QUICHE_EXPORT QuicConnection
   // Apply |connection_options| for this connection. Unlike SetFromConfig, this
   // can happen at anytime in the life of a connection.
   // Note there is no guarantee that all options can be applied. Components will
-  // only apply cherrypicked options that make sense at the time of the call.
+  // only apply cherry picked options that make sense at the time of the call.
   void ApplyConnectionOptions(const QuicTagVector& connection_options);
 
   // Called by the session when sending connection state to the client.
