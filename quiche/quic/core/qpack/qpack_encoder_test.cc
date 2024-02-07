@@ -306,7 +306,7 @@ TEST_P(QpackEncoderTest, DynamicTable) {
   header_list["cookie"] = "baz";              // name matches static entry
 
   // Set Dynamic Table Capacity instruction.
-  std::string set_dyanamic_table_capacity = absl::HexStringToBytes("3fe11f");
+  std::string set_dynamic_table_capacity = absl::HexStringToBytes("3fe11f");
   // Insert three entries into the dynamic table.
   std::string insert_entries;
   if (DisableHuffmanEncoding()) {
@@ -326,7 +326,7 @@ TEST_P(QpackEncoderTest, DynamicTable) {
       "0362617a");  // value "baz"
   EXPECT_CALL(encoder_stream_sender_delegate_,
               WriteStreamData(Eq(
-                  absl::StrCat(set_dyanamic_table_capacity, insert_entries))));
+                  absl::StrCat(set_dynamic_table_capacity, insert_entries))));
 
   EXPECT_EQ(absl::HexStringToBytes(
                 "0400"      // prefix
@@ -352,7 +352,7 @@ TEST_P(QpackEncoderTest, SmallDynamicTable) {
   header_list["bar"] = "baz";                 // no match
 
   // Set Dynamic Table Capacity instruction.
-  std::string set_dyanamic_table_capacity = absl::HexStringToBytes("3f07");
+  std::string set_dynamic_table_capacity = absl::HexStringToBytes("3f07");
   // Insert one entry into the dynamic table.
   std::string insert_entry;
   if (DisableHuffmanEncoding()) {
@@ -368,7 +368,7 @@ TEST_P(QpackEncoderTest, SmallDynamicTable) {
   }
   EXPECT_CALL(encoder_stream_sender_delegate_,
               WriteStreamData(
-                  Eq(absl::StrCat(set_dyanamic_table_capacity, insert_entry))));
+                  Eq(absl::StrCat(set_dynamic_table_capacity, insert_entry))));
 
   EXPECT_EQ(absl::HexStringToBytes("0200"  // prefix
                                    "80"    // dynamic entry 0
@@ -394,7 +394,7 @@ TEST_P(QpackEncoderTest, BlockedStream) {
   header_list1["foo"] = "bar";
 
   // Set Dynamic Table Capacity instruction.
-  std::string set_dyanamic_table_capacity = absl::HexStringToBytes("3fe11f");
+  std::string set_dynamic_table_capacity = absl::HexStringToBytes("3fe11f");
   // Insert one entry into the dynamic table.
   std::string insert_entry1;
   if (DisableHuffmanEncoding()) {
@@ -410,7 +410,7 @@ TEST_P(QpackEncoderTest, BlockedStream) {
   }
   EXPECT_CALL(encoder_stream_sender_delegate_,
               WriteStreamData(Eq(
-                  absl::StrCat(set_dyanamic_table_capacity, insert_entry1))));
+                  absl::StrCat(set_dynamic_table_capacity, insert_entry1))));
 
   EXPECT_EQ(absl::HexStringToBytes("0200"  // prefix
                                    "80"),  // dynamic entry 0
@@ -664,7 +664,7 @@ TEST_P(QpackEncoderTest, EncoderStreamWritesDisallowedThenAllowed) {
   header_list2["cookie"] = "baz";              // name matches static entry
 
   // Set Dynamic Table Capacity instruction.
-  std::string set_dyanamic_table_capacity = absl::HexStringToBytes("3fe11f");
+  std::string set_dynamic_table_capacity = absl::HexStringToBytes("3fe11f");
   // Insert three entries into the dynamic table.
   std::string insert_entries;
   if (DisableHuffmanEncoding()) {
@@ -684,7 +684,7 @@ TEST_P(QpackEncoderTest, EncoderStreamWritesDisallowedThenAllowed) {
       "0362617a");  // value "baz"
   EXPECT_CALL(encoder_stream_sender_delegate_,
               WriteStreamData(Eq(
-                  absl::StrCat(set_dyanamic_table_capacity, insert_entries))));
+                  absl::StrCat(set_dynamic_table_capacity, insert_entries))));
 
   EXPECT_EQ(absl::HexStringToBytes(
                 "0400"      // prefix
@@ -708,7 +708,7 @@ TEST_P(QpackEncoderTest, EncoderStreamWritesAllowedThenDisallowed) {
   header_list1["cookie"] = "baz";              // name matches static entry
 
   // Set Dynamic Table Capacity instruction.
-  std::string set_dyanamic_table_capacity = absl::HexStringToBytes("3fe11f");
+  std::string set_dynamic_table_capacity = absl::HexStringToBytes("3fe11f");
   // Insert three entries into the dynamic table.
   std::string insert_entries;
   if (DisableHuffmanEncoding()) {
@@ -728,7 +728,7 @@ TEST_P(QpackEncoderTest, EncoderStreamWritesAllowedThenDisallowed) {
       "0362617a");  // value "baz"
   EXPECT_CALL(encoder_stream_sender_delegate_,
               WriteStreamData(Eq(
-                  absl::StrCat(set_dyanamic_table_capacity, insert_entries))));
+                  absl::StrCat(set_dynamic_table_capacity, insert_entries))));
 
   EXPECT_EQ(absl::HexStringToBytes(
                 "0400"      // prefix
@@ -780,7 +780,7 @@ TEST_P(QpackEncoderTest, UnackedEntryCannotBeEvicted) {
   header_list1["foo"] = "bar";
 
   // Set Dynamic Table Capacity instruction.
-  std::string set_dyanamic_table_capacity = absl::HexStringToBytes("3f09");
+  std::string set_dynamic_table_capacity = absl::HexStringToBytes("3f09");
   // Insert one entry into the dynamic table.
   std::string insert_entries1;
   if (DisableHuffmanEncoding()) {
@@ -796,7 +796,7 @@ TEST_P(QpackEncoderTest, UnackedEntryCannotBeEvicted) {
   }
   EXPECT_CALL(encoder_stream_sender_delegate_,
               WriteStreamData(Eq(
-                  absl::StrCat(set_dyanamic_table_capacity, insert_entries1))));
+                  absl::StrCat(set_dynamic_table_capacity, insert_entries1))));
 
   EXPECT_EQ(
       absl::HexStringToBytes("0200"  // prefix
