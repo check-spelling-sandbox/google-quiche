@@ -480,7 +480,7 @@ class MockQuicConnectionVisitor : public QuicConnectionVisitorInterface {
                const QuicSocketAddress& peer_address,
                bool is_connectivity_probe),
               (override));
-  MOCK_METHOD(void, OnAckNeedsRetransmittableFrame, (), (override));
+  MOCK_METHOD(void, OnAckNeedsRetransmissibleFrame, (), (override));
   MOCK_METHOD(void, SendAckFrequency, (const QuicAckFrequencyFrame& frame),
               (override));
   MOCK_METHOD(void, SendNewConnectionId,
@@ -1222,7 +1222,7 @@ class MockSendAlgorithm : public SendAlgorithmInterface {
               (override));
   MOCK_METHOD(void, OnPacketSent,
               (QuicTime, QuicByteCount, QuicPacketNumber, QuicByteCount,
-               HasRetransmittableData),
+               HasRetransmissibleData),
               (override));
   MOCK_METHOD(void, OnPacketNeutered, (QuicPacketNumber), (override));
   MOCK_METHOD(void, OnRetransmissionTimeout, (bool), (override));
@@ -1413,7 +1413,7 @@ class MockPacketCreatorDelegate : public QuicPacketCreator::DelegateInterface {
   MOCK_METHOD(void, OnUnrecoverableError, (QuicErrorCode, const std::string&),
               (override));
   MOCK_METHOD(bool, ShouldGeneratePacket,
-              (HasRetransmittableData retransmittable, IsHandshake handshake),
+              (HasRetransmissibleData retransmissible, IsHandshake handshake),
               (override));
   MOCK_METHOD(void, MaybeBundleOpportunistically, (), (override));
   MOCK_METHOD(QuicByteCount, GetFlowControlSendWindowSize, (QuicStreamId),

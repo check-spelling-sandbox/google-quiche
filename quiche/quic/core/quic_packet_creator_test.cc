@@ -1500,11 +1500,11 @@ TEST_P(QuicPacketCreatorTest, AddFrameAndFlush) {
 
   // Ensure the packet is successfully created.
   ASSERT_TRUE(serialized_packet_->encrypted_buffer);
-  ASSERT_FALSE(serialized_packet_->retransmittable_frames.empty());
-  const QuicFrames& retransmittable =
-      serialized_packet_->retransmittable_frames;
-  ASSERT_EQ(1u, retransmittable.size());
-  EXPECT_EQ(STREAM_FRAME, retransmittable[0].type);
+  ASSERT_FALSE(serialized_packet_->retransmissible_frames.empty());
+  const QuicFrames& retransmissible =
+      serialized_packet_->retransmissible_frames;
+  ASSERT_EQ(1u, retransmissible.size());
+  EXPECT_EQ(STREAM_FRAME, retransmissible[0].type);
   EXPECT_TRUE(serialized_packet_->has_ack);
   EXPECT_EQ(QuicPacketNumber(10u), serialized_packet_->largest_acked);
   DeleteSerializedPacket();
@@ -1546,11 +1546,11 @@ TEST_P(QuicPacketCreatorTest, SerializeAndSendStreamFrame) {
 
   // Ensure the packet is successfully created.
   ASSERT_TRUE(serialized_packet_->encrypted_buffer);
-  ASSERT_FALSE(serialized_packet_->retransmittable_frames.empty());
-  const QuicFrames& retransmittable =
-      serialized_packet_->retransmittable_frames;
-  ASSERT_EQ(1u, retransmittable.size());
-  EXPECT_EQ(STREAM_FRAME, retransmittable[0].type);
+  ASSERT_FALSE(serialized_packet_->retransmissible_frames.empty());
+  const QuicFrames& retransmissible =
+      serialized_packet_->retransmissible_frames;
+  ASSERT_EQ(1u, retransmissible.size());
+  EXPECT_EQ(STREAM_FRAME, retransmissible[0].type);
   DeleteSerializedPacket();
 
   EXPECT_FALSE(creator_.HasPendingFrames());
@@ -1577,7 +1577,7 @@ TEST_P(QuicPacketCreatorTest, SerializeStreamFrameWithPadding) {
 
   // Check that a packet is created.
   ASSERT_TRUE(serialized_packet_->encrypted_buffer);
-  ASSERT_FALSE(serialized_packet_->retransmittable_frames.empty());
+  ASSERT_FALSE(serialized_packet_->retransmissible_frames.empty());
   ASSERT_EQ(serialized_packet_->packet_number_length,
             PACKET_1BYTE_PACKET_NUMBER);
   {
@@ -1962,21 +1962,21 @@ TEST_P(QuicPacketCreatorTest, PacketTransmissionType) {
 
   QuicAckFrame temp_ack_frame = InitAckFrame(1);
   QuicFrame ack_frame(&temp_ack_frame);
-  ASSERT_FALSE(QuicUtils::IsRetransmittableFrame(ack_frame.type));
+  ASSERT_FALSE(QuicUtils::IsRetransmissibleFrame(ack_frame.type));
 
   QuicStreamId stream_id = QuicUtils::GetFirstBidirectionalStreamId(
       client_framer_.transport_version(), Perspective::IS_CLIENT);
   QuicFrame stream_frame(QuicStreamFrame(stream_id,
                                          /*fin=*/false, 0u,
                                          absl::string_view()));
-  ASSERT_TRUE(QuicUtils::IsRetransmittableFrame(stream_frame.type));
+  ASSERT_TRUE(QuicUtils::IsRetransmissibleFrame(stream_frame.type));
 
   QuicFrame stream_frame_2(QuicStreamFrame(stream_id,
                                            /*fin=*/false, 1u,
                                            absl::string_view()));
 
   QuicFrame padding_frame{QuicPaddingFrame()};
-  ASSERT_FALSE(QuicUtils::IsRetransmittableFrame(padding_frame.type));
+  ASSERT_FALSE(QuicUtils::IsRetransmissibleFrame(padding_frame.type));
 
   EXPECT_CALL(delegate_, OnSerializedPacket(_))
       .WillOnce(Invoke(this, &QuicPacketCreatorTest::SaveSerializedPacket));
@@ -1994,7 +1994,7 @@ TEST_P(QuicPacketCreatorTest, PacketTransmissionType) {
   creator_.FlushCurrentPacket();
   ASSERT_TRUE(serialized_packet_->encrypted_buffer);
 
-  // The last retransmittable frame on packet is a stream frame, the packet's
+  // The last retransmissible frame on packet is a stream frame, the packet's
   // transmission type should be the same as the stream frame's.
   EXPECT_EQ(serialized_packet_->transmission_type, PATH_RETRANSMISSION);
   DeleteSerializedPacket();
@@ -2265,24 +2265,24 @@ TEST_P(QuicPacketCreatorTest, CoalesceStreamFrames) {
   ProcessPacket(*serialized_packet_);
 }
 
-TEST_P(QuicPacketCreatorTest, SaveNonRetransmittableFrames) {
+TEST_P(QuicPacketCreatorTest, SaveNonRetransmissibleFrames) {
   QuicAckFrame ack_frame(InitAckFrame(1));
   frames_.push_back(QuicFrame(&ack_frame));
   frames_.push_back(QuicFrame(QuicPaddingFrame(-1)));
   SerializedPacket serialized = SerializeAllFrames(frames_);
-  ASSERT_EQ(2u, serialized.nonretransmittable_frames.size());
-  EXPECT_EQ(ACK_FRAME, serialized.nonretransmittable_frames[0].type);
-  EXPECT_EQ(PADDING_FRAME, serialized.nonretransmittable_frames[1].type);
+  ASSERT_EQ(2u, serialized.nonretransmissible_frames.size());
+  EXPECT_EQ(ACK_FRAME, serialized.nonretransmissible_frames[0].type);
+  EXPECT_EQ(PADDING_FRAME, serialized.nonretransmissible_frames[1].type);
   // Verify full padding frame is translated to a padding frame with actual
   // bytes of padding.
   EXPECT_LT(
       0,
-      serialized.nonretransmittable_frames[1].padding_frame.num_padding_bytes);
+      serialized.nonretransmissible_frames[1].padding_frame.num_padding_bytes);
   frames_.clear();
 
   // Serialize another packet with the same frames.
   SerializedPacket packet = QuicPacketCreatorPeer::SerializeAllFrames(
-      &creator_, serialized.nonretransmittable_frames, buffer_,
+      &creator_, serialized.nonretransmissible_frames, buffer_,
       kMaxOutgoingPacketSize);
   // Verify the packet length of both packets are equal.
   EXPECT_EQ(serialized.encrypted_length, packet.encrypted_length);
@@ -2544,7 +2544,7 @@ class MockDelegate : public QuicPacketCreator::DelegateInterface {
   ~MockDelegate() override {}
 
   MOCK_METHOD(bool, ShouldGeneratePacket,
-              (HasRetransmittableData retransmittable, IsHandshake handshake),
+              (HasRetransmissibleData retransmissible, IsHandshake handshake),
               (override));
   MOCK_METHOD(void, MaybeBundleOpportunistically, (), (override));
   MOCK_METHOD(QuicByteCount, GetFlowControlSendWindowSize, (QuicStreamId),
@@ -2558,22 +2558,22 @@ class MockDelegate : public QuicPacketCreator::DelegateInterface {
 
   void SetCanWriteAnything() {
     EXPECT_CALL(*this, ShouldGeneratePacket(_, _)).WillRepeatedly(Return(true));
-    EXPECT_CALL(*this, ShouldGeneratePacket(NO_RETRANSMITTABLE_DATA, _))
+    EXPECT_CALL(*this, ShouldGeneratePacket(NO_RETRANSMISSIBLE_DATA, _))
         .WillRepeatedly(Return(true));
   }
 
   void SetCanNotWrite() {
     EXPECT_CALL(*this, ShouldGeneratePacket(_, _))
         .WillRepeatedly(Return(false));
-    EXPECT_CALL(*this, ShouldGeneratePacket(NO_RETRANSMITTABLE_DATA, _))
+    EXPECT_CALL(*this, ShouldGeneratePacket(NO_RETRANSMISSIBLE_DATA, _))
         .WillRepeatedly(Return(false));
   }
 
   // Use this when only ack frames should be allowed to be written.
-  void SetCanWriteOnlyNonRetransmittable() {
+  void SetCanWriteOnlyNonRetransmissible() {
     EXPECT_CALL(*this, ShouldGeneratePacket(_, _))
         .WillRepeatedly(Return(false));
-    EXPECT_CALL(*this, ShouldGeneratePacket(NO_RETRANSMITTABLE_DATA, _))
+    EXPECT_CALL(*this, ShouldGeneratePacket(NO_RETRANSMISSIBLE_DATA, _))
         .WillRepeatedly(Return(true));
   }
 };
@@ -2618,7 +2618,7 @@ class MultiplePacketsTestPacketCreator : public QuicPacketCreator {
         delegate_(static_cast<MockDelegate*>(delegate)),
         producer_(producer) {}
 
-  bool ConsumeRetransmittableControlFrame(const QuicFrame& frame,
+  bool ConsumeRetransmissibleControlFrame(const QuicFrame& frame,
                                           bool bundle_ack) {
     QuicFrames frames;
     if (bundle_ack) {
@@ -2629,7 +2629,7 @@ class MultiplePacketsTestPacketCreator : public QuicPacketCreator {
           FlushAckFrame(frames);
           return QuicFrames();
         }));
-    return QuicPacketCreator::ConsumeRetransmittableControlFrame(frame);
+    return QuicPacketCreator::ConsumeRetransmissibleControlFrame(frame);
   }
 
   QuicConsumedData ConsumeDataFastPath(QuicStreamId id,
@@ -2656,7 +2656,7 @@ class MultiplePacketsTestPacketCreator : public QuicPacketCreator {
 
   MessageStatus AddMessageFrame(QuicMessageId message_id,
                                 quiche::QuicheMemSlice message) {
-    if (!has_ack() && delegate_->ShouldGeneratePacket(NO_RETRANSMITTABLE_DATA,
+    if (!has_ack() && delegate_->ShouldGeneratePacket(NO_RETRANSMISSIBLE_DATA,
                                                       NOT_HANDSHAKE)) {
       EXPECT_CALL(*delegate_, MaybeBundleOpportunistically()).Times(1);
     }
@@ -2724,20 +2724,20 @@ class QuicPacketCreatorMultiplePacketsTest : public QuicTest {
                            size_t packet_index) {
     ASSERT_GT(packets_.size(), packet_index);
     const SerializedPacket& packet = packets_[packet_index];
-    size_t num_retransmittable_frames =
+    size_t num_retransmissible_frames =
         contents.num_connection_close_frames + contents.num_goaway_frames +
         contents.num_rst_stream_frames + contents.num_stream_frames +
         contents.num_crypto_frames + contents.num_ping_frames;
     size_t num_frames =
         contents.num_ack_frames + contents.num_stop_waiting_frames +
         contents.num_mtu_discovery_frames + contents.num_padding_frames +
-        num_retransmittable_frames;
+        num_retransmissible_frames;
 
-    if (num_retransmittable_frames == 0) {
-      ASSERT_TRUE(packet.retransmittable_frames.empty());
+    if (num_retransmissible_frames == 0) {
+      ASSERT_TRUE(packet.retransmissible_frames.empty());
     } else {
-      EXPECT_EQ(num_retransmittable_frames,
-                packet.retransmittable_frames.size());
+      EXPECT_EQ(num_retransmissible_frames,
+                packet.retransmissible_frames.size());
     }
 
     ASSERT_TRUE(packet.encrypted_buffer != nullptr);
@@ -2774,8 +2774,8 @@ class QuicPacketCreatorMultiplePacketsTest : public QuicTest {
   void CheckPacketHasSingleStreamFrame(size_t packet_index) {
     ASSERT_GT(packets_.size(), packet_index);
     const SerializedPacket& packet = packets_[packet_index];
-    ASSERT_FALSE(packet.retransmittable_frames.empty());
-    EXPECT_EQ(1u, packet.retransmittable_frames.size());
+    ASSERT_FALSE(packet.retransmissible_frames.empty());
+    EXPECT_EQ(1u, packet.retransmissible_frames.size());
     ASSERT_TRUE(packet.encrypted_buffer != nullptr);
     ASSERT_TRUE(simple_framer_.ProcessPacket(
         QuicEncryptedPacket(packet.encrypted_buffer, packet.encrypted_length)));
@@ -2809,11 +2809,11 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest, AddControlFrame_NotWritable) {
 
   QuicRstStreamFrame* rst_frame = CreateRstStreamFrame();
   const bool consumed =
-      creator_.ConsumeRetransmittableControlFrame(QuicFrame(rst_frame),
+      creator_.ConsumeRetransmissibleControlFrame(QuicFrame(rst_frame),
                                                   /*bundle_ack=*/false);
   EXPECT_FALSE(consumed);
   EXPECT_FALSE(creator_.HasPendingFrames());
-  EXPECT_FALSE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_FALSE(creator_.HasPendingRetransmissibleFrames());
   delete rst_frame;
 }
 
@@ -2835,15 +2835,15 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest,
 }
 
 TEST_F(QuicPacketCreatorMultiplePacketsTest, AddControlFrame_OnlyAckWritable) {
-  delegate_.SetCanWriteOnlyNonRetransmittable();
+  delegate_.SetCanWriteOnlyNonRetransmissible();
 
   QuicRstStreamFrame* rst_frame = CreateRstStreamFrame();
   const bool consumed =
-      creator_.ConsumeRetransmittableControlFrame(QuicFrame(rst_frame),
+      creator_.ConsumeRetransmissibleControlFrame(QuicFrame(rst_frame),
                                                   /*bundle_ack=*/false);
   EXPECT_FALSE(consumed);
   EXPECT_FALSE(creator_.HasPendingFrames());
-  EXPECT_FALSE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_FALSE(creator_.HasPendingRetransmissibleFrames());
   delete rst_frame;
 }
 
@@ -2851,10 +2851,10 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest,
        AddControlFrame_WritableAndShouldNotFlush) {
   delegate_.SetCanWriteAnything();
 
-  creator_.ConsumeRetransmittableControlFrame(QuicFrame(CreateRstStreamFrame()),
+  creator_.ConsumeRetransmissibleControlFrame(QuicFrame(CreateRstStreamFrame()),
                                               /*bundle_ack=*/false);
   EXPECT_TRUE(creator_.HasPendingFrames());
-  EXPECT_TRUE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_TRUE(creator_.HasPendingRetransmissibleFrames());
 }
 
 TEST_F(QuicPacketCreatorMultiplePacketsTest,
@@ -2863,11 +2863,11 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest,
 
   QuicRstStreamFrame* rst_frame = CreateRstStreamFrame();
   const bool consumed =
-      creator_.ConsumeRetransmittableControlFrame(QuicFrame(rst_frame),
+      creator_.ConsumeRetransmissibleControlFrame(QuicFrame(rst_frame),
                                                   /*bundle_ack=*/false);
   EXPECT_FALSE(consumed);
   EXPECT_FALSE(creator_.HasPendingFrames());
-  EXPECT_FALSE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_FALSE(creator_.HasPendingRetransmissibleFrames());
   delete rst_frame;
 }
 
@@ -2879,11 +2879,11 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest,
       .WillOnce(
           Invoke(this, &QuicPacketCreatorMultiplePacketsTest::SavePacket));
 
-  creator_.ConsumeRetransmittableControlFrame(QuicFrame(CreateRstStreamFrame()),
+  creator_.ConsumeRetransmissibleControlFrame(QuicFrame(CreateRstStreamFrame()),
                                               /*bundle_ack=*/false);
   creator_.Flush();
   EXPECT_FALSE(creator_.HasPendingFrames());
-  EXPECT_FALSE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_FALSE(creator_.HasPendingRetransmissibleFrames());
 
   PacketContents contents;
   contents.num_rst_stream_frames = 1;
@@ -2902,7 +2902,7 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest, ConsumeCryptoData) {
   creator_.Flush();
   EXPECT_EQ(data.length(), consumed_bytes);
   EXPECT_FALSE(creator_.HasPendingFrames());
-  EXPECT_FALSE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_FALSE(creator_.HasPendingRetransmissibleFrames());
 
   PacketContents contents;
   contents.num_crypto_frames = 1;
@@ -2921,7 +2921,7 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest,
   creator_.Flush();
   EXPECT_EQ(0u, consumed_bytes);
   EXPECT_FALSE(creator_.HasPendingFrames());
-  EXPECT_FALSE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_FALSE(creator_.HasPendingRetransmissibleFrames());
 }
 
 // Tests the case that after bundling data, send window reduced to be shorter
@@ -2989,7 +2989,7 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest, ConsumeData_NotWritable) {
   EXPECT_EQ(0u, consumed.bytes_consumed);
   EXPECT_FALSE(consumed.fin_consumed);
   EXPECT_FALSE(creator_.HasPendingFrames());
-  EXPECT_FALSE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_FALSE(creator_.HasPendingRetransmissibleFrames());
 }
 
 TEST_F(QuicPacketCreatorMultiplePacketsTest,
@@ -3003,7 +3003,7 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest,
   EXPECT_EQ(3u, consumed.bytes_consumed);
   EXPECT_TRUE(consumed.fin_consumed);
   EXPECT_TRUE(creator_.HasPendingFrames());
-  EXPECT_TRUE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_TRUE(creator_.HasPendingRetransmissibleFrames());
 }
 
 TEST_F(QuicPacketCreatorMultiplePacketsTest,
@@ -3021,7 +3021,7 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest,
   EXPECT_EQ(3u, consumed.bytes_consumed);
   EXPECT_TRUE(consumed.fin_consumed);
   EXPECT_FALSE(creator_.HasPendingFrames());
-  EXPECT_FALSE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_FALSE(creator_.HasPendingRetransmissibleFrames());
 
   PacketContents contents;
   contents.num_stream_frames = 1;
@@ -3051,7 +3051,7 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest, ConsumeData_Handshake) {
   }
   EXPECT_EQ(7u, consumed_bytes);
   EXPECT_FALSE(creator_.HasPendingFrames());
-  EXPECT_FALSE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_FALSE(creator_.HasPendingRetransmissibleFrames());
 
   PacketContents contents;
   if (QuicVersionUsesCryptoFrames(framer_.transport_version())) {
@@ -3092,7 +3092,7 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest,
   }
   EXPECT_EQ(3u, bytes_consumed);
   EXPECT_FALSE(creator_.HasPendingFrames());
-  EXPECT_FALSE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_FALSE(creator_.HasPendingRetransmissibleFrames());
 
   PacketContents contents;
   if (QuicVersionUsesCryptoFrames(framer_.transport_version())) {
@@ -3137,7 +3137,7 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest,
   EXPECT_EQ(4u, consumed.bytes_consumed);
   EXPECT_FALSE(consumed.fin_consumed);
   EXPECT_TRUE(creator_.HasPendingFrames());
-  EXPECT_TRUE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_TRUE(creator_.HasPendingRetransmissibleFrames());
 }
 
 TEST_F(QuicPacketCreatorMultiplePacketsTest, ConsumeData_BatchOperations) {
@@ -3153,7 +3153,7 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest, ConsumeData_BatchOperations) {
   EXPECT_EQ(4u, consumed.bytes_consumed);
   EXPECT_TRUE(consumed.fin_consumed);
   EXPECT_TRUE(creator_.HasPendingFrames());
-  EXPECT_TRUE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_TRUE(creator_.HasPendingRetransmissibleFrames());
 
   // Now both frames will be flushed out.
   EXPECT_CALL(delegate_, OnSerializedPacket(_))
@@ -3161,7 +3161,7 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest, ConsumeData_BatchOperations) {
           Invoke(this, &QuicPacketCreatorMultiplePacketsTest::SavePacket));
   creator_.Flush();
   EXPECT_FALSE(creator_.HasPendingFrames());
-  EXPECT_FALSE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_FALSE(creator_.HasPendingRetransmissibleFrames());
 
   PacketContents contents;
   contents.num_stream_frames = 1;
@@ -3211,7 +3211,7 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest,
   EXPECT_EQ(3u, consumed.bytes_consumed);
   EXPECT_FALSE(consumed.fin_consumed);
   EXPECT_TRUE(creator_.HasPendingFrames());
-  EXPECT_TRUE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_TRUE(creator_.HasPendingRetransmissibleFrames());
 
   // This frame will not fit with the existing frame, causing the queued frame
   // to be serialized, and it will be added to a new open packet.
@@ -3222,11 +3222,11 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest,
   EXPECT_EQ(3u, consumed.bytes_consumed);
   EXPECT_TRUE(consumed.fin_consumed);
   EXPECT_TRUE(creator_.HasPendingFrames());
-  EXPECT_TRUE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_TRUE(creator_.HasPendingRetransmissibleFrames());
 
   creator_.FlushCurrentPacket();
   EXPECT_FALSE(creator_.HasPendingFrames());
-  EXPECT_FALSE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_FALSE(creator_.HasPendingRetransmissibleFrames());
 
   PacketContents contents;
   contents.num_stream_frames = 1;
@@ -3249,18 +3249,18 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest, ConsumeDataFastPath) {
   EXPECT_EQ(10000u, consumed.bytes_consumed);
   EXPECT_TRUE(consumed.fin_consumed);
   EXPECT_FALSE(creator_.HasPendingFrames());
-  EXPECT_FALSE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_FALSE(creator_.HasPendingRetransmissibleFrames());
 
   PacketContents contents;
   contents.num_stream_frames = 1;
   CheckPacketContains(contents, 0);
   EXPECT_FALSE(packets_.empty());
   SerializedPacket& packet = packets_.back();
-  EXPECT_TRUE(!packet.retransmittable_frames.empty());
+  EXPECT_TRUE(!packet.retransmissible_frames.empty());
   EXPECT_EQ(LOSS_RETRANSMISSION, packet.transmission_type);
-  EXPECT_EQ(STREAM_FRAME, packet.retransmittable_frames.front().type);
+  EXPECT_EQ(STREAM_FRAME, packet.retransmissible_frames.front().type);
   const QuicStreamFrame& stream_frame =
-      packet.retransmittable_frames.front().stream_frame;
+      packet.retransmissible_frames.front().stream_frame;
   EXPECT_EQ(10000u, stream_frame.data_length + stream_frame.offset);
 }
 
@@ -3278,17 +3278,17 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest, ConsumeDataLarge) {
   EXPECT_EQ(10000u, consumed.bytes_consumed);
   EXPECT_TRUE(consumed.fin_consumed);
   EXPECT_FALSE(creator_.HasPendingFrames());
-  EXPECT_FALSE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_FALSE(creator_.HasPendingRetransmissibleFrames());
 
   PacketContents contents;
   contents.num_stream_frames = 1;
   CheckPacketContains(contents, 0);
   EXPECT_FALSE(packets_.empty());
   SerializedPacket& packet = packets_.back();
-  EXPECT_TRUE(!packet.retransmittable_frames.empty());
-  EXPECT_EQ(STREAM_FRAME, packet.retransmittable_frames.front().type);
+  EXPECT_TRUE(!packet.retransmissible_frames.empty());
+  EXPECT_EQ(STREAM_FRAME, packet.retransmissible_frames.front().type);
   const QuicStreamFrame& stream_frame =
-      packet.retransmittable_frames.front().stream_frame;
+      packet.retransmissible_frames.front().stream_frame;
   EXPECT_EQ(10000u, stream_frame.data_length + stream_frame.offset);
 }
 
@@ -3297,22 +3297,22 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest, ConsumeDataLargeSendAckFalse) {
 
   QuicRstStreamFrame* rst_frame = CreateRstStreamFrame();
   const bool success =
-      creator_.ConsumeRetransmittableControlFrame(QuicFrame(rst_frame),
+      creator_.ConsumeRetransmissibleControlFrame(QuicFrame(rst_frame),
                                                   /*bundle_ack=*/true);
   EXPECT_FALSE(success);
   EXPECT_FALSE(creator_.HasPendingFrames());
-  EXPECT_FALSE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_FALSE(creator_.HasPendingRetransmissibleFrames());
 
   delegate_.SetCanWriteAnything();
 
-  creator_.ConsumeRetransmittableControlFrame(QuicFrame(rst_frame),
+  creator_.ConsumeRetransmissibleControlFrame(QuicFrame(rst_frame),
                                               /*bundle_ack=*/false);
 
   const std::string data(10000, '?');
   EXPECT_CALL(delegate_, OnSerializedPacket(_))
       .WillRepeatedly(
           Invoke(this, &QuicPacketCreatorMultiplePacketsTest::SavePacket));
-  creator_.ConsumeRetransmittableControlFrame(QuicFrame(CreateRstStreamFrame()),
+  creator_.ConsumeRetransmissibleControlFrame(QuicFrame(CreateRstStreamFrame()),
                                               /*bundle_ack=*/true);
   QuicConsumedData consumed = creator_.ConsumeData(
       QuicUtils::GetFirstBidirectionalStreamId(framer_.transport_version(),
@@ -3323,14 +3323,14 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest, ConsumeDataLargeSendAckFalse) {
   EXPECT_EQ(10000u, consumed.bytes_consumed);
   EXPECT_TRUE(consumed.fin_consumed);
   EXPECT_FALSE(creator_.HasPendingFrames());
-  EXPECT_FALSE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_FALSE(creator_.HasPendingRetransmissibleFrames());
 
   EXPECT_FALSE(packets_.empty());
   SerializedPacket& packet = packets_.back();
-  EXPECT_TRUE(!packet.retransmittable_frames.empty());
-  EXPECT_EQ(STREAM_FRAME, packet.retransmittable_frames.front().type);
+  EXPECT_TRUE(!packet.retransmissible_frames.empty());
+  EXPECT_EQ(STREAM_FRAME, packet.retransmissible_frames.front().type);
   const QuicStreamFrame& stream_frame =
-      packet.retransmittable_frames.front().stream_frame;
+      packet.retransmissible_frames.front().stream_frame;
   EXPECT_EQ(10000u, stream_frame.data_length + stream_frame.offset);
 }
 
@@ -3351,14 +3351,14 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest, ConsumeDataLargeSendAckTrue) {
   EXPECT_EQ(10000u, consumed.bytes_consumed);
   EXPECT_TRUE(consumed.fin_consumed);
   EXPECT_FALSE(creator_.HasPendingFrames());
-  EXPECT_FALSE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_FALSE(creator_.HasPendingRetransmissibleFrames());
 
   EXPECT_FALSE(packets_.empty());
   SerializedPacket& packet = packets_.back();
-  EXPECT_TRUE(!packet.retransmittable_frames.empty());
-  EXPECT_EQ(STREAM_FRAME, packet.retransmittable_frames.front().type);
+  EXPECT_TRUE(!packet.retransmissible_frames.empty());
+  EXPECT_EQ(STREAM_FRAME, packet.retransmissible_frames.front().type);
   const QuicStreamFrame& stream_frame =
-      packet.retransmittable_frames.front().stream_frame;
+      packet.retransmissible_frames.front().stream_frame;
   EXPECT_EQ(10000u, stream_frame.data_length + stream_frame.offset);
 }
 
@@ -3367,22 +3367,22 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest, NotWritableThenBatchOperations) {
 
   QuicRstStreamFrame* rst_frame = CreateRstStreamFrame();
   const bool consumed =
-      creator_.ConsumeRetransmittableControlFrame(QuicFrame(rst_frame),
+      creator_.ConsumeRetransmissibleControlFrame(QuicFrame(rst_frame),
                                                   /*bundle_ack=*/true);
   EXPECT_FALSE(consumed);
   EXPECT_FALSE(creator_.HasPendingFrames());
-  EXPECT_FALSE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_FALSE(creator_.HasPendingRetransmissibleFrames());
   EXPECT_FALSE(creator_.HasPendingStreamFramesOfStream(3));
 
   delegate_.SetCanWriteAnything();
 
   EXPECT_TRUE(
-      creator_.ConsumeRetransmittableControlFrame(QuicFrame(rst_frame),
+      creator_.ConsumeRetransmissibleControlFrame(QuicFrame(rst_frame),
                                                   /*bundle_ack=*/false));
   // Send some data and a control frame
   creator_.ConsumeData(3, "quux", 0, NO_FIN);
   if (!VersionHasIetfQuicFrames(framer_.transport_version())) {
-    creator_.ConsumeRetransmittableControlFrame(QuicFrame(CreateGoAwayFrame()),
+    creator_.ConsumeRetransmissibleControlFrame(QuicFrame(CreateGoAwayFrame()),
                                                 /*bundle_ack=*/false);
   }
   EXPECT_TRUE(creator_.HasPendingStreamFramesOfStream(3));
@@ -3393,7 +3393,7 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest, NotWritableThenBatchOperations) {
           Invoke(this, &QuicPacketCreatorMultiplePacketsTest::SavePacket));
   creator_.Flush();
   EXPECT_FALSE(creator_.HasPendingFrames());
-  EXPECT_FALSE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_FALSE(creator_.HasPendingRetransmissibleFrames());
   EXPECT_FALSE(creator_.HasPendingStreamFramesOfStream(3));
 
   PacketContents contents;
@@ -3414,11 +3414,11 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest, NotWritableThenBatchOperations2) {
 
   QuicRstStreamFrame* rst_frame = CreateRstStreamFrame();
   const bool success =
-      creator_.ConsumeRetransmittableControlFrame(QuicFrame(rst_frame),
+      creator_.ConsumeRetransmissibleControlFrame(QuicFrame(rst_frame),
                                                   /*bundle_ack=*/true);
   EXPECT_FALSE(success);
   EXPECT_FALSE(creator_.HasPendingFrames());
-  EXPECT_FALSE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_FALSE(creator_.HasPendingRetransmissibleFrames());
 
   delegate_.SetCanWriteAnything();
 
@@ -3433,7 +3433,7 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest, NotWritableThenBatchOperations2) {
             Invoke(this, &QuicPacketCreatorMultiplePacketsTest::SavePacket));
   }
   EXPECT_TRUE(
-      creator_.ConsumeRetransmittableControlFrame(QuicFrame(rst_frame),
+      creator_.ConsumeRetransmissibleControlFrame(QuicFrame(rst_frame),
                                                   /*bundle_ack=*/false));
   // Send enough data to exceed one packet
   size_t data_len = kDefaultMaxPacketSize + 100;
@@ -3442,13 +3442,13 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest, NotWritableThenBatchOperations2) {
   EXPECT_EQ(data_len, consumed.bytes_consumed);
   EXPECT_TRUE(consumed.fin_consumed);
   if (!VersionHasIetfQuicFrames(framer_.transport_version())) {
-    creator_.ConsumeRetransmittableControlFrame(QuicFrame(CreateGoAwayFrame()),
+    creator_.ConsumeRetransmissibleControlFrame(QuicFrame(CreateGoAwayFrame()),
                                                 /*bundle_ack=*/false);
   }
 
   creator_.Flush();
   EXPECT_FALSE(creator_.HasPendingFrames());
-  EXPECT_FALSE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_FALSE(creator_.HasPendingRetransmissibleFrames());
 
   // The first packet should have the queued data and part of the stream data.
   PacketContents contents;
@@ -3501,9 +3501,9 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest, PacketTransmissionType) {
   // Ensure the packet is successfully created.
   ASSERT_EQ(1u, packets_.size());
   ASSERT_TRUE(packets_[0].encrypted_buffer);
-  ASSERT_EQ(1u, packets_[0].retransmittable_frames.size());
+  ASSERT_EQ(1u, packets_[0].retransmissible_frames.size());
   EXPECT_EQ(stream1_id,
-            packets_[0].retransmittable_frames[0].stream_frame.stream_id);
+            packets_[0].retransmissible_frames[0].stream_frame.stream_id);
 
   // Since the second frame was not added, the packet's transmission type
   // should be the first frame's type.
@@ -3546,7 +3546,7 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest, SetMaxPacketLength_Initial) {
   EXPECT_EQ(data_len, consumed.bytes_consumed);
   EXPECT_TRUE(consumed.fin_consumed);
   EXPECT_FALSE(creator_.HasPendingFrames());
-  EXPECT_FALSE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_FALSE(creator_.HasPendingRetransmissibleFrames());
 
   // We expect three packets, and first two of them have to be of packet_len
   // size.  We check multiple packets (instead of just one) because we want to
@@ -3586,7 +3586,7 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest, SetMaxPacketLength_Middle) {
   EXPECT_EQ(data_len, consumed.bytes_consumed);
   EXPECT_FALSE(consumed.fin_consumed);
   EXPECT_FALSE(creator_.HasPendingFrames());
-  EXPECT_FALSE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_FALSE(creator_.HasPendingRetransmissibleFrames());
 
   // Make sure we already have two packets.
   ASSERT_EQ(2u, packets_.size());
@@ -3605,7 +3605,7 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest, SetMaxPacketLength_Middle) {
   EXPECT_EQ(data_len, consumed.bytes_consumed);
   EXPECT_TRUE(consumed.fin_consumed);
   EXPECT_FALSE(creator_.HasPendingFrames());
-  EXPECT_FALSE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_FALSE(creator_.HasPendingRetransmissibleFrames());
 
   // We expect first data chunk to get fragmented, but the second one to fit
   // into a single packet.
@@ -3637,7 +3637,7 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest,
   EXPECT_EQ(first_write_len, consumed.bytes_consumed);
   EXPECT_FALSE(consumed.fin_consumed);
   EXPECT_TRUE(creator_.HasPendingFrames());
-  EXPECT_TRUE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_TRUE(creator_.HasPendingRetransmissibleFrames());
 
   // Make sure we have no packets so far.
   ASSERT_EQ(0u, packets_.size());
@@ -3653,7 +3653,7 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest,
   creator_.SetMaxPacketLength(packet_len);
   EXPECT_EQ(packet_len, creator_.max_packet_length());
   EXPECT_FALSE(creator_.HasPendingFrames());
-  EXPECT_FALSE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_FALSE(creator_.HasPendingRetransmissibleFrames());
 
   // We expect to see exactly one packet serialized after that, because we send
   // a value somewhat exceeding new max packet size, and the tail data does not
@@ -3673,7 +3673,7 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest,
   EXPECT_EQ(second_write_len, consumed.bytes_consumed);
   EXPECT_TRUE(consumed.fin_consumed);
   EXPECT_TRUE(creator_.HasPendingFrames());
-  EXPECT_TRUE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_TRUE(creator_.HasPendingRetransmissibleFrames());
 
   // We expect the first packet to be underfilled, and the second packet be up
   // to the new max packet size.
@@ -3727,7 +3727,7 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest,
   creator_.GenerateMtuDiscoveryPacket(target_mtu);
 
   EXPECT_FALSE(creator_.HasPendingFrames());
-  EXPECT_FALSE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_FALSE(creator_.HasPendingRetransmissibleFrames());
   ASSERT_EQ(1u, packets_.size());
   EXPECT_EQ(target_mtu, packets_[0].encrypted_length);
 
@@ -3768,12 +3768,12 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest,
   EXPECT_EQ(data_len, consumed.bytes_consumed);
   EXPECT_FALSE(consumed.fin_consumed);
   EXPECT_FALSE(creator_.HasPendingFrames());
-  EXPECT_FALSE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_FALSE(creator_.HasPendingRetransmissibleFrames());
 
   // Send the MTU probe.
   creator_.GenerateMtuDiscoveryPacket(target_mtu);
   EXPECT_FALSE(creator_.HasPendingFrames());
-  EXPECT_FALSE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_FALSE(creator_.HasPendingRetransmissibleFrames());
 
   // Send data after the MTU probe.
   creator_.AttachPacketFlusher();
@@ -3786,7 +3786,7 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest,
   EXPECT_EQ(data_len, consumed.bytes_consumed);
   EXPECT_TRUE(consumed.fin_consumed);
   EXPECT_FALSE(creator_.HasPendingFrames());
-  EXPECT_FALSE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_FALSE(creator_.HasPendingRetransmissibleFrames());
 
   ASSERT_EQ(5u, packets_.size());
   EXPECT_EQ(kDefaultMaxPacketSize, packets_[0].encrypted_length);
@@ -3816,10 +3816,10 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest,
       framer_.transport_version(), kQuicErrorCode, NO_IETF_QUIC_ERROR,
       std::string(error_details),
       /*transport_close_frame_type=*/0);
-  creator_.ConsumeRetransmittableControlFrame(QuicFrame(frame),
+  creator_.ConsumeRetransmissibleControlFrame(QuicFrame(frame),
                                               /*bundle_ack=*/false);
   EXPECT_TRUE(creator_.HasPendingFrames());
-  EXPECT_TRUE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_TRUE(creator_.HasPendingRetransmissibleFrames());
 }
 
 TEST_F(QuicPacketCreatorMultiplePacketsTest,
@@ -3856,7 +3856,7 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest,
   creator_.Flush();
   EXPECT_EQ(kStreamFramePayloadSize, consumed.bytes_consumed);
   EXPECT_FALSE(creator_.HasPendingFrames());
-  EXPECT_FALSE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_FALSE(creator_.HasPendingRetransmissibleFrames());
 
   EXPECT_EQ(1u, packets_.size());
   PacketContents contents;
@@ -3899,7 +3899,7 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest,
   creator_.Flush();
   EXPECT_EQ(kStreamFramePayloadSize, consumed.bytes_consumed);
   EXPECT_FALSE(creator_.HasPendingFrames());
-  EXPECT_FALSE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_FALSE(creator_.HasPendingRetransmissibleFrames());
 
   EXPECT_LE(1u, packets_.size());
   PacketContents contents;
@@ -3958,7 +3958,7 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest,
   EXPECT_EQ(kStreamFramePayloadSize, consumed.bytes_consumed);
   creator_.Flush();
   EXPECT_FALSE(creator_.HasPendingFrames());
-  EXPECT_FALSE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_FALSE(creator_.HasPendingRetransmissibleFrames());
 
   EXPECT_LE(2u, packets_.size());
   PacketContents contents;
@@ -3994,14 +3994,14 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest, AddMessageFrame) {
   EXPECT_EQ(MESSAGE_STATUS_SUCCESS,
             creator_.AddMessageFrame(1, MemSliceFromString("message")));
   EXPECT_TRUE(creator_.HasPendingFrames());
-  EXPECT_TRUE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_TRUE(creator_.HasPendingRetransmissibleFrames());
 
   // Add a message which causes the flush of current packet.
   EXPECT_EQ(MESSAGE_STATUS_SUCCESS,
             creator_.AddMessageFrame(
                 2, MemSliceFromString(std::string(
                        creator_.GetCurrentLargestMessagePayload(), 'a'))));
-  EXPECT_TRUE(creator_.HasPendingRetransmittableFrames());
+  EXPECT_TRUE(creator_.HasPendingRetransmissibleFrames());
 
   // Failed to send messages which cannot fit into one packet.
   EXPECT_EQ(MESSAGE_STATUS_TOO_LARGE,
@@ -4039,8 +4039,8 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest, ExtraPaddingNeeded) {
                            framer_.transport_version(), Perspective::IS_CLIENT),
                        "", 0, FIN);
   creator_.Flush();
-  ASSERT_FALSE(packets_[0].nonretransmittable_frames.empty());
-  QuicFrame padding = packets_[0].nonretransmittable_frames[0];
+  ASSERT_FALSE(packets_[0].nonretransmissible_frames.empty());
+  QuicFrame padding = packets_[0].nonretransmissible_frames[0];
   // Verify stream frame expansion is excluded.
   EXPECT_EQ(padding.padding_frame.num_padding_bytes, 1);
 }
@@ -4083,9 +4083,9 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest,
   EXPECT_CALL(delegate_, OnSerializedPacket(_))
       .WillOnce(Invoke([=](SerializedPacket packet) {
         EXPECT_EQ(peer_addr, packet.peer_address);
-        ASSERT_EQ(2u, packet.retransmittable_frames.size());
-        EXPECT_EQ(STREAM_FRAME, packet.retransmittable_frames.front().type);
-        EXPECT_EQ(STREAM_FRAME, packet.retransmittable_frames.back().type);
+        ASSERT_EQ(2u, packet.retransmissible_frames.size());
+        EXPECT_EQ(STREAM_FRAME, packet.retransmissible_frames.front().type);
+        EXPECT_EQ(STREAM_FRAME, packet.retransmissible_frames.back().type);
       }));
   creator_.FlushCurrentPacket();
 }
@@ -4108,13 +4108,13 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest,
   EXPECT_CALL(delegate_, OnSerializedPacket(_))
       .WillOnce(Invoke([=](SerializedPacket packet) {
         EXPECT_EQ(peer_addr, packet.peer_address);
-        ASSERT_EQ(1u, packet.retransmittable_frames.size());
-        EXPECT_EQ(STREAM_FRAME, packet.retransmittable_frames.front().type);
+        ASSERT_EQ(1u, packet.retransmissible_frames.size());
+        EXPECT_EQ(STREAM_FRAME, packet.retransmissible_frames.front().type);
       }))
       .WillOnce(Invoke([=](SerializedPacket packet) {
         EXPECT_EQ(peer_addr1, packet.peer_address);
-        ASSERT_EQ(1u, packet.retransmittable_frames.size());
-        EXPECT_EQ(STREAM_FRAME, packet.retransmittable_frames.front().type);
+        ASSERT_EQ(1u, packet.retransmissible_frames.size());
+        EXPECT_EQ(STREAM_FRAME, packet.retransmissible_frames.front().type);
       }));
   EXPECT_TRUE(creator_.HasPendingFrames());
   {
@@ -4165,8 +4165,8 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest,
   EXPECT_CALL(delegate_, OnSerializedPacket(_))
       .WillOnce(Invoke([=](SerializedPacket packet) {
         EXPECT_EQ(peer_addr, packet.peer_address);
-        ASSERT_EQ(1u, packet.retransmittable_frames.size());
-        EXPECT_EQ(STREAM_FRAME, packet.retransmittable_frames.front().type);
+        ASSERT_EQ(1u, packet.retransmissible_frames.size());
+        EXPECT_EQ(STREAM_FRAME, packet.retransmissible_frames.front().type);
 
         QuicConnectionId client_connection_id2 = TestConnectionId(3);
         QuicConnectionId server_connection_id2 = TestConnectionId(4);
@@ -4191,8 +4191,8 @@ TEST_F(QuicPacketCreatorMultiplePacketsTest,
       }))
       .WillOnce(Invoke([=](SerializedPacket packet) {
         EXPECT_EQ(peer_addr1, packet.peer_address);
-        ASSERT_EQ(1u, packet.retransmittable_frames.size());
-        EXPECT_EQ(STREAM_FRAME, packet.retransmittable_frames.front().type);
+        ASSERT_EQ(1u, packet.retransmissible_frames.size());
+        EXPECT_EQ(STREAM_FRAME, packet.retransmissible_frames.front().type);
       }));
   creator_.FlushCurrentPacket();
 }
