@@ -203,7 +203,7 @@ void ConnectUdpTunnel::OpenTunnel(
     return;
   }
 
-  // TODO(ericorth): Validate that the IP address doesn't fall into diallowed
+  // TODO(ericorth): Validate that the IP address doesn't fall into disallowed
   // ranges per RFC 9298, Section 7.
   QuicSocketAddress address = tools::LookupAddress(AF_UNSPEC, *target);
   if (!address.IsInitialized()) {
